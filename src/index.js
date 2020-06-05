@@ -12,14 +12,16 @@ localforage.config({
 
 export default class GameBoyPlayer {
   constructor(canvas, {
-    mediaStreamWorkerSrc = ''
+    mediaStreamWorkerSrc = '',
+    soundVolume,
   } = {}) {
     this.core = new Core({
       canvas,
       loadSRAM: this.loadSRAM,
       loadRTC: this.loadRTC,
       mediaStreamWorkerSrc,
-      pause: this.pause.bind(this)
+      pause: this.pause.bind(this),
+      soundVolume: typeof soundVolume === `undefined` ? settings.soundVolume : soundVolume,
     })
     this.runInterval = null
 

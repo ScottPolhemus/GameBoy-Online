@@ -21910,6 +21910,7 @@ function () {
         GBBOOTROM = params.GBBOOTROM,
         GBCBOOTROM = params.GBCBOOTROM,
         mediaStreamWorkerSrc = params.mediaStreamWorkerSrc,
+        soundVolume = params.soundVolume,
         pause = params.pause; // Params, etc...
 
     this.canvas = canvas; // Canvas DOM object for drawing out the graphics to.
@@ -21925,6 +21926,8 @@ function () {
     this.loadRTC = loadRTC; // Load RTC from storage
 
     this.mediaStreamWorkerSrc = mediaStreamWorkerSrc; // URL for media stream worker script
+
+    this.soundVolume = soundVolume; // Initial volume
 
     this.pause = pause; // Callback function to stop emulation after exceptions
     // Event emitter
@@ -26502,7 +26505,7 @@ function () {
       if (!this.audioHandle) {
         this.audioResamplerFirstPassFactor = Math.max(Math.min(Math.floor(this.clocksPerSecond / 44100), Math.floor(0xFFFF / 0x1E0)), 1);
         this.downSampleInputDivider = 1 / (this.audioResamplerFirstPassFactor * 0xF0);
-        this.audioHandle = new _XAudioServer__WEBPACK_IMPORTED_MODULE_8__["default"](2, this.clocksPerSecond / this.audioResamplerFirstPassFactor, 0, Math.max(this.baseCPUCyclesPerIteration * _settings__WEBPACK_IMPORTED_MODULE_5__["default"].audioBufferMaxSpan / this.audioResamplerFirstPassFactor, 8192) << 1, null, _settings__WEBPACK_IMPORTED_MODULE_5__["default"].volumeLevel, null, this.mediaStreamWorkerSrc);
+        this.audioHandle = new _XAudioServer__WEBPACK_IMPORTED_MODULE_8__["default"](2, this.clocksPerSecond / this.audioResamplerFirstPassFactor, 0, Math.max(this.baseCPUCyclesPerIteration * _settings__WEBPACK_IMPORTED_MODULE_5__["default"].audioBufferMaxSpan / this.audioResamplerFirstPassFactor, 8192) << 1, null, this.soundVolume, null, this.mediaStreamWorkerSrc);
       }
 
       this.initAudioBuffer();
@@ -26510,11 +26513,19 @@ function () {
   }, {
     key: "changeVolume",
     value: function changeVolume() {
-      var volume = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : _settings__WEBPACK_IMPORTED_MODULE_5__["default"].soundVolume;
+      var volume = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : this.soundVolume;
 
       if (_settings__WEBPACK_IMPORTED_MODULE_5__["default"].soundOn && this.audioHandle) {
         this.audioHandle.changeVolume(volume);
+      } else {
+        this.soundVolume = volume;
       }
+    }
+  }, {
+    key: "changeHqxScale",
+    value: function changeHqxScale() {
+      var scale = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : this.hqxScale;
+      this.hqxScale = scale;
     }
   }, {
     key: "initAudioBuffer",
@@ -31768,7 +31779,8 @@ function () {
   function GameBoyPlayer(canvas) {
     var _ref = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : {},
         _ref$mediaStreamWorke = _ref.mediaStreamWorkerSrc,
-        mediaStreamWorkerSrc = _ref$mediaStreamWorke === void 0 ? '' : _ref$mediaStreamWorke;
+        mediaStreamWorkerSrc = _ref$mediaStreamWorke === void 0 ? '' : _ref$mediaStreamWorke,
+        soundVolume = _ref.soundVolume;
 
     _babel_runtime_helpers_classCallCheck__WEBPACK_IMPORTED_MODULE_2___default()(this, GameBoyPlayer);
 
@@ -31777,7 +31789,8 @@ function () {
       loadSRAM: this.loadSRAM,
       loadRTC: this.loadRTC,
       mediaStreamWorkerSrc: mediaStreamWorkerSrc,
-      pause: this.pause.bind(this)
+      pause: this.pause.bind(this),
+      soundVolume: typeof soundVolume === "undefined" ? _settings__WEBPACK_IMPORTED_MODULE_8__["default"].soundVolume : soundVolume
     });
     this.runInterval = null;
     this.core.events.on('ramWrite', Object(lodash__WEBPACK_IMPORTED_MODULE_5__["debounce"])(this.autoSave.bind(this), 100));

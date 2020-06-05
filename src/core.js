@@ -14,6 +14,7 @@ export default class GameBoyPlayerCore {
       GBBOOTROM,
       GBCBOOTROM,
       mediaStreamWorkerSrc,
+      soundVolume,
       pause
     } = params
 
@@ -25,6 +26,7 @@ export default class GameBoyPlayerCore {
     this.loadSRAM = loadSRAM // Load SRAM from storage
     this.loadRTC = loadRTC // Load RTC from storage
     this.mediaStreamWorkerSrc = mediaStreamWorkerSrc // URL for media stream worker script
+    this.soundVolume = soundVolume // Initial volume
     this.pause = pause // Callback function to stop emulation after exceptions
 
     // Event emitter
@@ -5070,7 +5072,7 @@ export default class GameBoyPlayerCore {
         0,
         Math.max(this.baseCPUCyclesPerIteration * settings.audioBufferMaxSpan / this.audioResamplerFirstPassFactor, 8192) << 1,
         null,
-        settings.volumeLevel,
+        this.soundVolume,
         null,
         this.mediaStreamWorkerSrc
       );
@@ -5079,10 +5081,16 @@ export default class GameBoyPlayerCore {
     this.initAudioBuffer();
   }
 
-  changeVolume(volume = settings.soundVolume) {
+  changeVolume(volume = this.soundVolume) {
     if (settings.soundOn && this.audioHandle) {
       this.audioHandle.changeVolume(volume);
+    } else {
+      this.soundVolume = volume;
     }
+  }
+
+  changeHqxScale(scale = this.hqxScale) {
+    this.hqxScale = scale;
   }
 
   initAudioBuffer() {
